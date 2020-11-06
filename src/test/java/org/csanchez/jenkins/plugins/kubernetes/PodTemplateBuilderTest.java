@@ -352,6 +352,18 @@ public class PodTemplateBuilderTest {
     }
 
     @Test
+    public void defaultLimits() throws Exception {
+        PodTemplate template = new PodTemplate();
+        Pod pod = new PodTemplateBuilder(template).build();
+        ResourceRequirements resources = pod.getSpec().getContainers().get(0).getResources();
+        assertNotNull(resources);
+        Map<String, Quantity> limits = resources.getLimits();
+        assertNotNull(limits);
+        PodTemplateUtilsTest.assertQuantity(PodTemplateBuilder.DEFAULT_JNLP_CONTAINER_CPU_LIMIT, limits.get("cpu"));
+        PodTemplateUtilsTest.assertQuantity(PodTemplateBuilder.DEFAULT_JNLP_CONTAINER_MEMORY_LIMIT, limits.get("memory"));
+    }
+
+    @Test
     @TestCaseName("{method}(directConnection={0})")
     @Parameters({ "true", "false" })
     public void testOverridesFromYaml(boolean directConnection) throws Exception {

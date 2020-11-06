@@ -103,6 +103,11 @@ public class PodTemplateBuilder {
     static final String DEFAULT_JNLP_CONTAINER_CPU_REQUEST = System
             .getProperty(PodTemplateStepExecution.class.getName() + ".defaultContainer.defaultCpuRequest", "100m");
 
+    static final String DEFAULT_JNLP_CONTAINER_MEMORY_LIMIT = System
+            .getProperty(PodTemplateStepExecution.class.getName() + ".defaultContainer.defaultMemoryLimit", "256Mi");
+    static final String DEFAULT_JNLP_CONTAINER_CPU_LIMIT = System
+            .getProperty(PodTemplateStepExecution.class.getName() + ".defaultContainer.defaultCpuLimit", "100m");
+
     private static final String JNLPMAC_REF = "\\$\\{computer.jnlpmac\\}";
     private static final String NAME_REF = "\\$\\{computer.name\\}";
 
@@ -261,7 +266,16 @@ public class PodTemplateBuilder {
         envVars.putAll(jnlp.getEnv().stream().collect(Collectors.toMap(EnvVar::getName, Function.identity())));
         jnlp.setEnv(new ArrayList<>(envVars.values()));
         if (jnlp.getResources() == null) {
-            jnlp.setResources(new ContainerBuilder().editOrNewResources().addToRequests("cpu", new Quantity(DEFAULT_JNLP_CONTAINER_CPU_REQUEST)).addToRequests("memory", new Quantity(DEFAULT_JNLP_CONTAINER_MEMORY_REQUEST)).endResources().build().getResources());
+            jnlp.setResources(
+                    new ContainerBuilder()
+                            .editOrNewResources()
+                            .addToRequests("cpu", new Quantity(DEFAULT_JNLP_CONTAINER_CPU_REQUEST))
+                            .addToRequests("memory", new Quantity(DEFAULT_JNLP_CONTAINER_MEMORY_REQUEST))
+                            .addToLimits("cpu", new Quantity(DEFAULT_JNLP_CONTAINER_CPU_LIMIT))
+                            .addToLimits("memory", new Quantity(DEFAULT_JNLP_CONTAINER_MEMORY_LIMIT))
+                            .endResources()
+                            .build()
+                            .getResources());
         }
         
         // If the volume mounts of any container has been set to null, set it to empty list.
